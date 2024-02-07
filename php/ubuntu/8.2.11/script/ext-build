@@ -1,0 +1,23 @@
+#!/bin/bash
+
+buildSwoole(){
+  echo -e "build swoole extension\n"
+  pecl install https://pecl.php.net/get/swoole-${SWOOLE_VERSION}.tgz
+  echo "extension=swoole.so" >> ${PHP_ROOTDIR}/conf.d/extension.ini
+}
+
+buildImagick(){
+  echo -e "build imagick extension\n"
+  #install ImageMagick
+  curl -o /tmp/ImageMagick-${IMAGICK_VERSION}.tar.gz https://imagemagick.org/archive/releases/ImageMagick-7.1.0-62.tar.xz
+  tar -xvf /tmp/ImageMagick-${IMAGICK_VERSION}.tar.gz -C /tmp
+  cd /tmp/ImageMagick-${IMAGICK_VERSION}
+  ./configure --prefix=/usr/local/imagick
+  make && make install
+  #install php-imagick extension
+  curl -L -o imagick-${IMAGICK_VERSION}.tgz https://pecl.php.net/get/imagick-${IMAGICK_VERSION}.tgz
+  tar -xvf imagick-${IMAGICK_VERSION}.tgz && cd imagick-${IMAGICK_VERSION}
+  phpize && ./configure --with-imagick=/usr/local/imagick
+  make && make install && rm -rf /tmp/*
+  echo "extension=imagick.so" >> ${PHP_ROOTDIR}/conf.d/extension.ini
+}
