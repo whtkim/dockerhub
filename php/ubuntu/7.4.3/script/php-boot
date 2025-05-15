@@ -1,0 +1,25 @@
+#!/bin/bash
+
+envCheck(){
+  if [[ $APP_ENV == "dev"* ]]; then
+    sed -i 's/^[ ]*opcache.enable=1/;opcache.enable=1/g' "$PHP_ROOTDIR"/php.ini
+  else
+    sed -i 's/^;opcache.enable=1/opcache.enable=1/g' "$PHP_ROOTDIR"/php.ini
+  fi
+}
+
+bootstrap(){
+  #运行环境检查
+  envCheck
+
+  #执行启动命令
+  if [ -n "$*" ]; then
+    eval "$*"
+  elif type php-fpm >/dev/null 2>&1; then
+    php-fpm -F
+  else
+    tail -f /dev/null
+  fi
+}
+
+bootstrap "$*"
