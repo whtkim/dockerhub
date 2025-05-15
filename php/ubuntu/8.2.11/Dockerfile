@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 # 参数设置
 ARG timezone="Asia/Shanghai"
