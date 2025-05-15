@@ -37,7 +37,9 @@ RUN apt-get install -y --no-install-recommends ${PHPIZE_DEPS} libsodium-dev libx
     libssl-dev libreadline-dev zlib1g-dev libcurl4-openssl-dev libonig-dev libzip-dev \
     libpng-dev libjpeg-dev libwebp-dev libfreetype-dev \
  && curl -o /tmp/php-${PHP_VERSION}.tar.gz https://www.php.net/distributions/php-${PHP_VERSION}.tar.gz \
- && tar -xvf /tmp/php-${PHP_VERSION}.tar.gz -C /tmp && cd /tmp/php-${PHP_VERSION} \
+ && tar -xvf /tmp/php-${PHP_VERSION}.tar.gz -C /tmp \
+ && tar -xvf /tmp/php-${PHP_VERSION}.tar.gz -C /usr/local/src \
+ && cd /tmp/php-${PHP_VERSION} \
  && ./configure --prefix=${PHP_ROOTDIR} \
         --with-config-file-path=${PHP_ROOTDIR} \
         --with-config-file-scan-dir=${PHP_ROOTDIR}/conf.d \
