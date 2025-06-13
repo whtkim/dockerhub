@@ -1,0 +1,4 @@
+data/planet/*
+data/ztncui/*
+!data/planet/.gitkeep
+!data/ztncui/.gitkeep

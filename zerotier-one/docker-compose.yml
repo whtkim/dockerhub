@@ -1,0 +1,22 @@
+services:
+  zerotier-planet:
+    image: zerotier/zerotier:1.14.2
+    container_name: zerotier-planet
+    network_mode: host
+    volumes:
+      - ./data/planet:/var/lib/zerotier-one
+    restart: unless-stopped
+  ztncui:
+    image: keynetworks/ztncui:latest
+    container_name: ztncui
+    environment:
+      - NODE_ENV=production
+      - ZTNCUI_PORT=3443
+      - ZTNCUI_PASSWD=admin
+      - ZTNCUI_TOKEN_FILE=/var/lib/zerotier-one/authtoken.secret
+    ports:
+      - "3443:3443"
+    volumes:
+      - ./data/planet:/var/lib/zerotier-one
+      - ./data/ztncui:/opt/key-networks/ztncui/etc
+    restart: unless-stopped
