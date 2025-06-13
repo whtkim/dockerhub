@@ -1,0 +1,4 @@
+conf/*
+data/*
+!conf/.gitkeep
+!data/.gitkeep
