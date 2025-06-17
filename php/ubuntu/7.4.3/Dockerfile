@@ -31,8 +31,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # 下载并构建 PHP
 RUN curl -fsSL -o /tmp/php.tar.gz https://www.php.net/distributions/php-${php_version}.tar.gz \
-    && tar -xzf /tmp/php.tar.gz -C /tmp \
-    && cd /tmp/php-${php_version} \
+    && tar -xzf /tmp/php.tar.gz -C /usr/local/src \
+    && cd /usr/local/src/php-${php_version} \
     && ./configure --prefix=${PHP_ROOTDIR} \
         --with-config-file-path=${PHP_ROOTDIR} \
         --with-config-file-scan-dir=${PHP_ROOTDIR}/conf.d \
@@ -43,10 +43,11 @@ RUN curl -fsSL -o /tmp/php.tar.gz https://www.php.net/distributions/php-${php_ve
         --with-freetype --with-jpeg --with-webp --enable-gd \
     && make -j$(nproc) && make install \
     && mkdir -p ${PHP_ROOTDIR}/conf.d \
-    && cp -v /tmp/php-${php_version}/php.ini-production ${PHP_ROOTDIR}/php.ini
+    && cp -v /usr/local/src/php-${php_version}/php.ini-production ${PHP_ROOTDIR}/php.ini \
+    && mv /usr/local/src/php-${php_version}/ext ${PHP_ROOTDIR}/src
 
 # 安装 redis 扩展 + swoole + imagick
-COPY script/php-ext-build /usr/local/php/bin/php-ext-build
+COPY script/php-ext-build ${PHP_ROOTDIR}/bin/php-ext-build
 RUN set -e && source ${PHP_ROOTDIR}/bin/php-ext-build \
     && chmod +x ${PHP_ROOTDIR}/bin/php-ext-build \
     &&  buildRedis "${redis_version}" \
@@ -90,4 +91,3 @@ RUN echo "/usr/local/imagick/lib" > /etc/ld.so.conf.d/imagick.conf && ldconfig \
 WORKDIR /www
 EXPOSE 9000
 ENTRYPOINT ["php-boot"]
-    
