@@ -16,7 +16,7 @@ ARG timezone="Asia/Shanghai"
 
 ENV PHP_ROOTDIR="/usr/local/php"
 ENV DEBIAN_FRONTEND="noninteractive"
-ENV PATH="$PATH:${PHP_ROOTDIR}/bin"
+ENV PATH="$PATH:${PHP_ROOTDIR}/bin:${PHP_ROOTDIR}/sbin"
 
 # 安装依赖
 RUN apt-get update && apt-get install -y --no-install-recommends \
