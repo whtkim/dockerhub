@@ -16,7 +16,7 @@ ARG timezone="Asia/Shanghai"
 
 ENV PHP_ROOTDIR="/usr/local/php"
 ENV DEBIAN_FRONTEND="noninteractive"
-ENV PATH="$PATH:${PHP_ROOTDIR}/bin:${PHP_ROOTDIR}/sbin"
+ENV PATH="$PATH:${PHP_ROOTDIR}/bin"
 
 # 安装依赖
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -66,7 +66,7 @@ FROM ubuntu:20.04
 ARG timezone="Asia/Shanghai"
 ENV DEBIAN_FRONTEND="noninteractive"
 ENV PHP_ROOTDIR="/usr/local/php"
-ENV PATH="${PATH}:${PHP_ROOTDIR}/bin"
+ENV PATH="${PATH}:${PHP_ROOTDIR}/bin:${PHP_ROOTDIR}/sbin"
 
 COPY --from=builder /usr/local/php ${PHP_ROOTDIR}
 COPY --from=builder /usr/local/imagick /usr/local/imagick
