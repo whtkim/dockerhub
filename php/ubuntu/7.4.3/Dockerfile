@@ -36,21 +36,37 @@ RUN curl -fsSL -o /tmp/php.tar.gz https://www.php.net/distributions/php-${php_ve
     && ./configure --prefix=${PHP_ROOTDIR} \
         --with-config-file-path=${PHP_ROOTDIR} \
         --with-config-file-scan-dir=${PHP_ROOTDIR}/conf.d \
-        --enable-fpm --enable-mbstring --enable-pcntl --enable-sockets \
-        --enable-opcache --enable-bcmath --enable-intl --enable-soap \
-        --with-zlib --with-curl --with-openssl --with-readline \
-        --with-mhash --with-pdo-mysql=mysqlnd \
-        --with-freetype --with-jpeg --with-webp --enable-gd \
+        --with-pdo-mysql=shared,mysqlnd --enable-shared --enable-mysqlnd\
+        --enable-gd --with-freetype --with-jpeg --with-webp \
+        --with-openssl \
+        --with-zlib \
+        --with-curl \
+        --with-readline \
+        --with-mhash \
+        --with-sodium \
+        --with-xsl \
+        --with-zip \
+        --with-pear \
+        --enable-fpm \
+        --enable-mbstring \
+        --enable-pcntl \
+        --enable-sockets \
+        --enable-session \
+        --enable-bcmath \
+        --enable-intl \
+        --enable-soap \
+        --enable-opcache \
     && make -j$(nproc) && make install \
     && mkdir -p ${PHP_ROOTDIR}/conf.d \
     && cp -v /usr/local/src/php-${php_version}/php.ini-production ${PHP_ROOTDIR}/php.ini \
-    && mv /usr/local/src/php-${php_version}/ext ${PHP_ROOTDIR}/src
+    && mv /usr/local/src/php-${php_version}/ext ${PHP_ROOTDIR}/ext
 
 # 安装 redis 扩展 + swoole + imagick
 COPY script/php-ext-build ${PHP_ROOTDIR}/bin/php-ext-build
-RUN set -e && source ${PHP_ROOTDIR}/bin/php-ext-build \
-    && chmod +x ${PHP_ROOTDIR}/bin/php-ext-build \
-    &&  buildRedis "${redis_version}" \
+RUN set -e && curl -fsSL -o ${PHP_ROOTDIR}/bin/composer https://mirrors.aliyun.com/composer/composer.phar \
+    && chmod +x ${PHP_ROOTDIR}/bin/composer \
+    && source ${PHP_ROOTDIR}/bin/php-ext-build \
+    && buildRedis "${redis_version}" \
     && [ "$swoole_enable" = "1" ] && buildSwoole "${swoole_version}" \
     && [ "$imagick_enable" = "1" ] && buildImagick "${imagemagick_version}" "${imagick_version}"
 
@@ -74,6 +90,15 @@ COPY script/php-boot /usr/local/bin/php-boot
 
 RUN echo "/usr/local/imagick/lib" > /etc/ld.so.conf.d/imagick.conf && ldconfig \
     && chmod +x /usr/local/bin/php-boot \
+    # 修改配置文件
+    && sed -i "s/;extension=pdo_mysql/extension=pdo_mysql/g" ${PHP_ROOTDIR}/php.ini \
+    && cp -v ${PHP_ROOTDIR}/etc/php-fpm.conf.default ${PHP_ROOTDIR}/etc/php-fpm.conf \
+    && sed -i "s/;pid = run\/php-fpm.pid/pid = run\/php-fpm.pid/g" ${PHP_ROOTDIR}/etc/php-fpm.conf \
+    && cp ${PHP_ROOTDIR}/etc/php-fpm.d/www.conf.default ${PHP_ROOTDIR}/etc/php-fpm.d/www.conf \
+    && sed -i "s/listen = 127.0.0.1:9000/listen = 0.0.0.0:9000/g" ${PHP_ROOTDIR}/etc/php-fpm.d/www.conf \
+    && sed -i "s/user = nobody/user = www-data/g" ${PHP_ROOTDIR}/etc/php-fpm.d/www.conf \
+    && sed -i "s/group = nobody/group = www-data/g" ${PHP_ROOTDIR}/etc/php-fpm.d/www.conf \
+    # 安装运行时依赖
     && apt-get update && apt-get install -y --no-install-recommends \
         tzdata curl ca-certificates \
         libssl1.1 \
@@ -84,9 +109,12 @@ RUN echo "/usr/local/imagick/lib" > /etc/ld.so.conf.d/imagick.conf && ldconfig \
         libxpm4 libxslt1.1 \
         imagemagick \
         libdjvulibre21 libopenexr24 libwebpdemux2 \
+    # 设置时区
     && cp /usr/share/zoneinfo/${timezone} /etc/localtime \
     && echo "${timezone}" > /etc/timezone \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/*
+    # 清理构建产物
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/*
 
 WORKDIR /www
 EXPOSE 9000
