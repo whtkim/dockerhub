@@ -9,6 +9,8 @@ services:
   ztncui:
     image: keynetworks/ztncui:latest
     container_name: ztncui
+    depends_on:
+      - zerotier-planet
     environment:
       - NODE_ENV=production
       - ZTNCUI_PORT=3443
