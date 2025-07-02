@@ -1,0 +1,101 @@
+#!/bin/bash
+
+# 安装 PHP Redis 扩展
+buildRedis() {
+  REDIS_VERSION="$1"
+
+  echo -e "\n🔧 Building Redis extension: v${REDIS_VERSION}\n"
+
+  # 下载 Redis 扩展源码包
+  curl -fsSL -o /tmp/redis-${REDIS_VERSION}.tgz "https://pecl.php.net/get/redis-${REDIS_VERSION}.tgz"
+
+  # 解压源码
+  tar -xzf /tmp/redis-${REDIS_VERSION}.tgz -C /tmp
+  cd /tmp/redis-${REDIS_VERSION}
+
+  # 构建并安装扩展
+  phpize
+  ./configure
+  make -j"$(nproc)"
+  make install
+
+  # 启用扩展
+  echo "extension=redis.so" >> "${PHP_ROOTDIR}/conf.d/extension.ini"
+
+  # 清理临时文件
+  rm -rf /tmp/*
+  echo -e "\n✅ Redis v${REDIS_VERSION} build complete.\n"
+}
+
+# 安装 PHP Swoole 扩展
+buildSwoole() {
+  SWOOLE_VERSION="$1"
+
+  set -e  # 遇到错误即退出
+
+  echo -e "\n🔧 Building Swoole extension: v${SWOOLE_VERSION}\n"
+
+  SRC_URL="https://github.com/swoole/swoole-src/archive/refs/tags/v${SWOOLE_VERSION}.tar.gz"
+  SRC_TGZ="/tmp/swoole-src-${SWOOLE_VERSION}.tgz"
+  SRC_DIR="/tmp/swoole-src-${SWOOLE_VERSION}"
+
+  echo "📥 Downloading Swoole source..."
+  curl -fsSL -o "$SRC_TGZ" "$SRC_URL"
+
+  echo "📦 Extracting..."
+  tar -xzf "$SRC_TGZ" -C /tmp
+
+  echo "🚧 Building..."
+  cd "$SRC_DIR"
+  phpize
+  ./configure --enable-sockets --enable-openssl --enable-http2 --enable-mysqlnd --enable-swoole-json --enable-swoole-curl
+  make -j"$(nproc)"
+  make install
+
+  echo "📦 Enabling Swoole extension..."
+  echo "extension=swoole.so" >> "${PHP_ROOTDIR}/conf.d/extension.ini"
+
+  echo "🧹 Cleaning up..."
+  rm -rf "$SRC_TGZ" "$SRC_DIR"
+
+  echo -e "\n✅ Swoole v${SWOOLE_VERSION} build complete.\n"
+}
+
+# 安装 PHP Imagick 扩展
+buildImagick() {
+  IMAGEMAGICK_VERSION="$1"
+  IMAGICK_VERSION="$2"
+
+  echo -e "\n🔧 Building Imagick extension: v${IMAGEMAGICK_VERSION}\n"
+
+  # 下载并编译 ImageMagick（系统库）
+  echo "📥 Downloading ImageMagick..."
+  curl -fsSL -o /tmp/ImageMagick-${IMAGEMAGICK_VERSION}.tar.gz \
+    "https://github.com/ImageMagick/ImageMagick/archive/refs/tags/${IMAGEMAGICK_VERSION}.tar.gz"
+
+  echo "📦 Extracting ImageMagick..."
+  tar -xzf /tmp/ImageMagick-${IMAGEMAGICK_VERSION}.tar.gz -C /tmp
+  cd /tmp/ImageMagick-${IMAGEMAGICK_VERSION}
+  ./configure --prefix=/usr/local/imagick
+  make -j"$(nproc)"
+  make install
+
+  # 下载并安装 imagick PHP 扩展
+  echo "📥 Downloading imagick PHP extension..."
+  curl -fsSL -o /tmp/imagick-${IMAGICK_VERSION}.tgz \
+    "https://pecl.php.net/get/imagick-${IMAGICK_VERSION}.tgz"
+
+  tar -xzf /tmp/imagick-${IMAGICK_VERSION}.tgz -C /tmp
+  cd /tmp/imagick-${IMAGICK_VERSION}
+  phpize
+  ./configure --with-imagick=/usr/local/imagick
+  make -j"$(nproc)"
+  make install
+
+  # 启用扩展
+  echo "extension=imagick.so" >> "${PHP_ROOTDIR}/conf.d/extension.ini"
+
+  # 清理临时文件
+  rm -rf /tmp/*
+  echo -e "\n✅ Imagick v${IMAGICK_VERSION} build complete.\n"
+}
