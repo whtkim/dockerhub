@@ -42,5 +42,5 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            yourdockerhubuser/${{ steps.tag.outputs.app }}:latest
-            yourdockerhubuser/${{ steps.tag.outputs.app }}:${{ steps.tag.outputs.version }}
+            whtkim/${{ steps.tag.outputs.app }}:latest
+            whtkim/${{ steps.tag.outputs.app }}:${{ steps.tag.outputs.version }}
