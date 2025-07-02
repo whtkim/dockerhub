@@ -3,7 +3,7 @@ name: Build Docker Image on Tag
 on:
   push:
     tags:
-      - '*:*'   # 形如 app:version 的 tag，例如 foo:1.0.0
+      - '*-*'   # 匹配形如 app-version 的 tag，例如 php-7.4.3
 
 jobs:
   docker-build:
@@ -29,8 +29,8 @@ jobs:
         id: tag
         run: |
           TAG_REF="${GITHUB_REF#refs/tags/}"
-          APP="${TAG_REF%%:*}"
-          VERSION="${TAG_REF#*:}"
+          APP="${TAG_REF%%-*}"
+          VERSION="${TAG_REF#*-}"
           echo "app=$APP" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
