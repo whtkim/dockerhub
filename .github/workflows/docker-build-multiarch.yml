@@ -34,7 +34,7 @@ jobs:
           echo "app=$APP" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Build and Push Multi-Platform Image
+      - name: Build and Push Main Platforms
         uses: docker/build-push-action@v5
         with:
           context: ./build/${{ steps.tag.outputs.app }}/${{ steps.tag.outputs.version }}
@@ -44,8 +44,23 @@ jobs:
             linux/amd64
             linux/arm64/v8
             linux/arm/v7
+          tags: |
+            whtkim/${{ steps.tag.outputs.app }}:latest
+            whtkim/${{ steps.tag.outputs.app }}:${{ steps.tag.outputs.version }}
+
+      - name: Build and Push Optional Platforms
+        continue-on-error: true
+        uses: docker/build-push-action@v5
+        with:
+          context: ./build/${{ steps.tag.outputs.app }}/${{ steps.tag.outputs.version }}
+          file: ./build/${{ steps.tag.outputs.app }}/${{ steps.tag.outputs.version }}/Dockerfile
+          push: true
+          platforms: |
             linux/arm/v5
             linux/mips64le
+            linux/386
+            linux/ppc64le
+            linux/s390x
           tags: |
             whtkim/${{ steps.tag.outputs.app }}:latest
             whtkim/${{ steps.tag.outputs.app }}:${{ steps.tag.outputs.version }}
