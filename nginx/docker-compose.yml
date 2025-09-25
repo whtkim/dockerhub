@@ -12,5 +12,6 @@ services:
       - ./conf/conf.d:/usr/local/nginx/conf/conf.d
       - ./conf/vhosts:/usr/local/nginx/conf/vhosts
       - ./conf/modules:/usr/local/nginx/conf/modules
+      - ./certs:/usr/local/nginx/conf/certs
       - ./logs:/usr/local/nginx/logs
     restart: always
