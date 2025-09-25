@@ -8,9 +8,9 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/conf/nginx.conf:/usr/local/nginx/conf/nginx.conf
-      - ./nginx/conf/conf.d:/usr/local/nginx/conf/conf.d
-      - ./nginx/conf/vhosts:/usr/local/nginx/conf/vhosts
-      - ./nginx/conf/modules:/usr/local/nginx/conf/modules
-      - ./nginx/logs:/usr/local/nginx/logs
+      - ./conf/nginx.conf:/usr/local/nginx/conf/nginx.conf
+      - ./conf/conf.d:/usr/local/nginx/conf/conf.d
+      - ./conf/vhosts:/usr/local/nginx/conf/vhosts
+      - ./conf/modules:/usr/local/nginx/conf/modules
+      - ./logs:/usr/local/nginx/logs
     restart: always
