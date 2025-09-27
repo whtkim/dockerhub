@@ -10,7 +10,6 @@ services:
       - "8384:8384"   # Web UI
       - "22000:22000/tcp"   # TCP sync
       - "22000:22000/udp"   # QUIC sync
-      - "21027:21027/udp"   # Local discovery
     volumes:
       - ./config:/var/syncthing/config
       - ./data:/var/syncthing/data
